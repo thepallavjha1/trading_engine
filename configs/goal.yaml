@@ -1,0 +1,10 @@
+asset: "BTC/USDT"
+target_return_30d: 0.05
+max_drawdown: 0.08
+min_sharpe: 1.2
+reflection_every: 5
+initial_balance: 10000
+supported_assets:
+  - "BTC/USDT"
+  - "ETH/USDT"
+  - "SOL/USDT"
