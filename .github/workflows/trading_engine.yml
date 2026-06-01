@@ -23,7 +23,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
-        run: pip install --break-system-packages -r requirements.txt
+        run: pip install --break-system-packages -r requirements-engine.txt
 
       - name: Run trading cycle
         run: cd src && python3 run.py --once
