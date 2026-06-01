@@ -23,13 +23,13 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install --break-system-packages -r requirements.txt
 
       - name: Run trading cycle
-        run: cd src && python run.py --once
+        run: cd src && python3 run.py --once
 
       - name: Run report
-        run: cd src && python report_generator.py
+        run: cd src && python3 report_generator.py
 
       - name: Commit and push
         run: |
