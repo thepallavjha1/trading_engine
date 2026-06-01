@@ -4,9 +4,11 @@ import yaml
 import logging
 from pathlib import Path
 from datetime import datetime
-from dotenv import load_dotenv
-
-load_dotenv(Path(__file__).parent.parent / ".env")
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).parent.parent / ".env")
+except ImportError:
+    pass
 
 BASE_DIR = Path(__file__).parent.parent
 CONFIGS_DIR = BASE_DIR / "configs"
