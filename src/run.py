@@ -36,7 +36,7 @@ def run_cycle():
     reflection_every = int(goal.get("reflection_every", 5))
 
     logger.info(f"Fetching market data: {asset} [{timeframe}]")
-    df = get_ohlcv(asset, timeframe, lookback, use_cache=True, max_cache_age_minutes=55)
+    df = get_ohlcv(asset, timeframe, lookback, use_cache=True, max_cache_age_minutes=13)
 
     engine = PaperTradeEngine(strategy=strategy, goal=goal)
     trades = engine.run_backtest(df)
@@ -71,7 +71,7 @@ def main():
     logger.info("=" * 60)
 
     goal = load_goal()
-    interval_minutes = 60
+    interval_minutes = 15
     logger.info(f"Asset: {goal.get('asset')} | Mode: {'single-cycle' if args.once else 'continuous'}")
 
     run_cycle()
