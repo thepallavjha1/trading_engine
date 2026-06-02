@@ -14,7 +14,7 @@ env:
 jobs:
   trade:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -35,7 +35,7 @@ jobs:
         run: |
           git config user.name  "trading-bot[bot]"
           git config user.email "trading-bot[bot]@users.noreply.github.com"
-          git add data/trades.jsonl data/reflections.jsonl configs/strategy.yaml history/ reports/
+          git add data/trades.jsonl data/reflections.jsonl data/live_state.json configs/strategy.yaml history/ reports/
           git diff --staged --quiet && echo "Nothing to commit" || \
             git commit -m "chore: trading cycle $(date -u '+%Y-%m-%d %H:%M UTC')"
           git push

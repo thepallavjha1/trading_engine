@@ -1,7 +1,7 @@
 version: '02'
 entry:
   indicator: RSI
-  threshold: 30
+  threshold: 40
 direction: LONG
 stop_loss_pct: 1.5
 take_profit_pct: 4
