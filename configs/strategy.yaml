@@ -3,8 +3,9 @@ entry:
   indicator: RSI
   threshold: 40
 direction: LONG
-stop_loss_pct: 1.5
-take_profit_pct: 4
+stop_loss_pct: 5
+take_profit_pct: 10
+take_profit2_pct: 15
 position_size_pct: 5
 timeframe: 15m
 lookback_candles: 200
