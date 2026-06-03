@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime
 
-GITHUB_REPO = os.getenv("GITHUB_REPO")
+GITHUB_REPO = os.getenv("GITHUB_REPO") or st.secrets.get("GITHUB_REPO", "")
 
 if GITHUB_REPO:
     from github_reader import read_jsonl, read_yaml, list_version_yamls

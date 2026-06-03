@@ -1,1 +1,0 @@
-{"timestamp": "2026-06-01T04:19:10.728936Z", "version": "02", "changed_variable": "stop_loss_pct", "old_value": 2.0, "new_value": 1.5, "reason": "Sharpe below target. Tightening stop loss to improve risk-adjusted return.", "expected_effect": "Lower stop loss reduces losers, improving reward-to-risk ratio."}
