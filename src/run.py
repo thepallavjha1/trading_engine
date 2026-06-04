@@ -3,6 +3,7 @@ import sys
 import time
 import signal
 import argparse
+from datetime import datetime, timezone
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -45,13 +46,25 @@ def run_cycle():
     regimes = detect_regime(df)
     df["regime"] = regimes
 
-    # Use the last COMPLETED candle for signals (df.iloc[-2]); df.iloc[-1] is the
-    # currently forming candle whose RSI may already have recovered even though the
-    # prior closed candle triggered the condition — this was silently missing entries
-    # on 15m data where RSI can swing 10+ points between candle close and next open.
+    # Determine the last CLOSED candle for signals.  Exchange APIs always include
+    # the currently forming candle as the final row, EXCEPT when the job runs right
+    # at candle-close before the new candle has started — in that case iloc[-1] is
+    # already closed and using iloc[-2] would skip the fresh signal by one full bar.
+    # We detect this by comparing the last candle's open-time age against the
+    # timeframe duration: if it's older than one full candle (+30 s buffer) it must
+    # be closed, so we use it directly; otherwise we fall back to iloc[-2].
+    _TF_SECS = {"1m": 60, "5m": 300, "15m": 900, "30m": 1800,
+                "1h": 3600, "4h": 14400, "1d": 86400}
+    _candle_secs = _TF_SECS.get(timeframe, 900)
+    _now_utc = datetime.now(timezone.utc)
+    _last_ts = df.index[-1]
+    if _last_ts.tzinfo is None:
+        _last_ts = _last_ts.replace(tzinfo=timezone.utc)
+    _last_age = (_now_utc - _last_ts).total_seconds()
+    signal_bar = df.iloc[-1] if _last_age >= _candle_secs + 30 else df.iloc[-2]
+
     latest_price = float(df.iloc[-1]["close"])
     latest_ts = df.index[-1]
-    signal_bar = df.iloc[-2]  # last closed candle — use this for all signal checks
 
     stop_loss_pct = float(strategy.get("stop_loss_pct", 5.0)) / 100.0
     take_profit_pct = float(strategy.get("take_profit_pct", 10.0)) / 100.0   # TP1 — 50% exit at 1:2 RR

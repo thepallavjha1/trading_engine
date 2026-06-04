@@ -224,13 +224,13 @@ def main():
         c5.metric("Win Rate", f"{perf['win_rate']*100:.1f}%")
 
         st.markdown("---")
-        st.plotly_chart(_equity_fig(all_trades), use_container_width=True)
+        st.plotly_chart(_equity_fig(all_trades), use_container_width=True, key="ov_equity")
 
         cl, cr = st.columns(2)
         with cl:
-            st.plotly_chart(_drawdown_fig(all_trades), use_container_width=True)
+            st.plotly_chart(_drawdown_fig(all_trades), use_container_width=True, key="ov_drawdown")
         with cr:
-            st.plotly_chart(_regime_fig(regime_perf), use_container_width=True)
+            st.plotly_chart(_regime_fig(regime_perf), use_container_width=True, key="ov_regime")
 
         st.subheader("Current Strategy")
         sc1, sc2 = st.columns(2)
@@ -252,8 +252,8 @@ def main():
         if not all_trades:
             st.info("No trades yet. The engine logs trades every hour.")
         else:
-            st.plotly_chart(_cumulative_returns_fig(all_trades), use_container_width=True)
-            st.plotly_chart(_trade_timeline_fig(all_trades), use_container_width=True)
+            st.plotly_chart(_cumulative_returns_fig(all_trades), use_container_width=True, key="hist_cumret")
+            st.plotly_chart(_trade_timeline_fig(all_trades), use_container_width=True, key="hist_timeline")
 
             st.markdown("---")
             st.subheader(f"All Trades ({len(all_trades)} total)")
@@ -303,7 +303,7 @@ def main():
                              template="plotly_dark", color="Count",
                              color_continuous_scale="viridis")
                 fig.update_layout(height=280, showlegend=False)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True, key="hist_regime_bar")
 
     # ── Performance ───────────────────────────────────────────────────────
     elif page == "Performance":
@@ -314,13 +314,13 @@ def main():
         sc2.metric("Drawdown Score", f"{perf.get('dd_score',0):.3f}",     help="30% weight")
         sc3.metric("Sharpe Score",   f"{perf.get('sharpe_score',0):.3f}", help="30% weight")
 
-        st.plotly_chart(_equity_fig(all_trades), use_container_width=True)
+        st.plotly_chart(_equity_fig(all_trades), use_container_width=True, key="perf_equity")
 
         cl, cr = st.columns(2)
         with cl:
-            st.plotly_chart(_drawdown_fig(all_trades), use_container_width=True)
+            st.plotly_chart(_drawdown_fig(all_trades), use_container_width=True, key="perf_drawdown")
         with cr:
-            st.plotly_chart(_return_dist_fig(all_trades), use_container_width=True)
+            st.plotly_chart(_return_dist_fig(all_trades), use_container_width=True, key="perf_dist")
 
         st.subheader("Regime Performance")
         if regime_perf:
