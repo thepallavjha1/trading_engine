@@ -1,0 +1,1 @@
+{"timestamp": "2026-06-11T01:45:35.397874Z", "version": "03", "changed_variable": "take_profit_pct", "old_value": 10.0, "new_value": 10.5, "reason": "Sharpe below target. Increasing take profit to improve reward-to-risk ratio.", "expected_effect": "Higher take profit increases average winner size relative to risk."}
