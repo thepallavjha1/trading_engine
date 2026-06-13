@@ -250,7 +250,7 @@ def main():
         st.title("Trade History & Returns")
 
         if not all_trades:
-            st.info("No trades yet. The engine logs trades every hour.")
+            st.info("No trades yet. The engine evaluates the market every 15 minutes.")
         else:
             st.plotly_chart(_cumulative_returns_fig(all_trades), use_container_width=True, key="hist_cumret")
             st.plotly_chart(_trade_timeline_fig(all_trades), use_container_width=True, key="hist_timeline")

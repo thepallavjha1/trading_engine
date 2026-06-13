@@ -17,7 +17,7 @@ trading_engine/
 │   └── strategy_versions/ # Versioned strategy snapshots (v0001.yaml, ...)
 ├── reports/               # Markdown research reports
 └── src/
-    ├── run.py             # Main trading loop
+    ├── run.py             # Live 15-min decide-and-execute loop
     ├── optimizer.py       # One-shot optimization cycle
     ├── report_generator.py
     ├── dashboard.py       # Streamlit dashboard
@@ -48,7 +48,20 @@ cd src
 python run.py
 ```
 
-Fetches market data, runs backtest over historical candles, logs trades, and auto-triggers optimization every `reflection_every` trades.
+Runs continuously: every **15 minutes** it fetches the latest market data, evaluates
+the most recently **closed** 15m candle, and makes a single live decision —
+enter, hold, partial take-profit, or exit. State is persisted in
+`data/live_state.json` so each cycle resumes exactly where the last one left off.
+Optimization auto-triggers every `reflection_every` logged trades.
+
+### Run exactly one decision cycle (used by GitHub Actions)
+```bash
+cd src
+python run.py --once
+```
+
+Performs a single decide-and-execute cycle and exits. This is what the scheduled
+GitHub Actions workflow calls every 15 minutes (cron `*/15 * * * *`).
 
 ### Run one optimization cycle manually
 ```bash
@@ -74,20 +87,27 @@ streamlit run dashboard.py
 
 Opens at `http://localhost:8501` with live charts.
 
-## Self-Improvement Loop
+## Decision Loop (every 15 minutes)
 
-1. **Fetch** OHLCV data for BTC/USDT (or configured asset)
+1. **Fetch** the latest OHLCV data for BTC/USDT (or configured asset)
 2. **Generate signals** using RSI (configurable in `strategy.yaml`)
-3. **Backtest** paper trades with stop-loss, take-profit, position sizing
-4. **Log** every trade with regime tag
-5. **Score** performance: 40% return + 30% drawdown + 30% Sharpe
-6. Every `reflection_every` trades → **Reflection Engine** runs:
+3. **Decide on the last closed 15m candle** — exactly one action per cycle:
+   - If **flat** and an entry signal fires → **enter** at the current price
+   - If **in a position** → check stop-loss, take-profit (TP1 partial / TP2),
+     trailing fallback, or exit signal and act accordingly; otherwise **hold**
+4. **Persist** the new position state to `data/live_state.json`
+5. **Log** every closed trade with a regime tag to `data/trades.jsonl`
+6. **Score** performance: 40% return + 30% drawdown + 30% Sharpe
+7. Every `reflection_every` trades → **Reflection Engine** runs:
    - Detects primary weakness (return / drawdown / Sharpe)
    - Generates hypothesis
    - Changes **exactly one** parameter
    - Saves version snapshot
    - Logs reasoning to `reflections.jsonl`
-7. **Repeat** with updated strategy
+8. **Repeat** 15 minutes later with the updated strategy and state
+
+> The engine is fully **paper-trading**: no real orders are placed. "Execution"
+> means updating the simulated balance and position in `data/live_state.json`.
 
 ## Configuration
 
@@ -101,17 +121,18 @@ reflection_every: 5
 initial_balance: 10000
 ```
 
-`configs/strategy.yaml` (edit freely — changes take effect on next run):
+`configs/strategy.yaml` (edit freely — changes take effect on the next 15-min cycle):
 ```yaml
-version: "01"
+version: "04"
 entry:
-  indicator: RSI
-  threshold: 30
+  indicator: RSI        # RSI | MACD | EMA
+  threshold: 45         # higher = enters on more setups (more aggressive)
 direction: LONG
-stop_loss_pct: 2
-take_profit_pct: 4
-position_size_pct: 5
-timeframe: "1h"
+stop_loss_pct: 5
+take_profit_pct: 10.5   # TP1 — exits 50% of the position
+take_profit2_pct: 15    # TP2 — exits the remaining 50%
+position_size_pct: 15   # % of balance risked per trade (more aggressive)
+timeframe: "15m"        # candle size the engine decides on
 lookback_candles: 200
 ```
 
@@ -121,6 +142,21 @@ lookback_candles: 200
 cd trading_engine
 python -m pytest tests/ -v
 ```
+
+## Deployment
+
+The engine runs **serverless** on GitHub Actions and the dashboard is hosted on
+**Streamlit Community Cloud**.
+
+- **GitHub Actions** (`.github/workflows/trading_engine.yml`): a cron job runs
+  `python run.py --once` every 15 minutes, generates a report, then commits and
+  pushes any changes to `data/`, `configs/strategy.yaml`, `history/`, and
+  `reports/`. Requires `contents: write` permission (already configured).
+- **Streamlit** (`src/dashboard.py`): reads the committed data straight from the
+  GitHub repo via `src/github_reader.py` when the `GITHUB_REPO` secret is set, so
+  the dashboard always reflects the latest pushed cycle without needing its own
+  copy of the data. Configure `GITHUB_REPO` in `.streamlit/secrets.toml` (local)
+  or in the Streamlit Cloud app secrets.
 
 ## Supported Assets
 - BTC/USDT
