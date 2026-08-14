@@ -1,4 +1,9 @@
 {
-  "in_position": false,
-  "balance": 10048.5425
+  "in_position": true,
+  "entry_price": 62690.4,
+  "entry_time": "2026-08-14T14:30:00+00:00",
+  "qty": 0.022440372848155383,
+  "balance": 10048.5425,
+  "hold_bars": 0,
+  "tp1_hit": false
 }
