@@ -4,6 +4,6 @@
   "entry_time": "2026-08-28T22:15:00+00:00",
   "qty": 0.018257797793609656,
   "balance": 10099.0009,
-  "hold_bars": 0,
+  "hold_bars": 1,
   "tp1_hit": false
 }
