@@ -1,10 +1,10 @@
-version: '23'
+version: '22'
 entry:
   indicator: RSI
   threshold: 43.0
 direction: LONG
 stop_loss_pct: 0.5
-take_profit_pct: 14.5
+take_profit_pct: 14.0
 take_profit2_pct: 15
 position_size_pct: 14.0
 timeframe: 15m
